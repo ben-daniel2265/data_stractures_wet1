@@ -1,8 +1,10 @@
-#ifndef TEAM
-#define TEAM
+#ifndef TEAM_h
+#define TEAM_h
 
 #include "AVLTree.h"
 #include "player.h"
+
+class Player;
 
 class Team {
     private:
@@ -20,18 +22,26 @@ class Team {
 
     public:
 
-    int get_id();
-    int get_points();
-    int getgames_played();
-    int get_team_strength();
-    int get_player_count();
-    int get_goalie_count();
+    int getId() const;
+    int getPoints() const;
+    int getGamesPlayed() const;
+    int getTeamStrength() const;
+    int getPlayerCount() const;
+    int getGoalieCount() const;
+    AVLTree<Player> *getPlayerTreeById() const;
+    AVLTree<Player> *getPlayerTreeByScore() const;
+    Player *getTopScorer() const;
 
-    AVLTree<Player>& get_player_tree_by_id();
-    AVLTree<Player>& get_player_tree_by_score();
-
-    Player& get_top_scorer();
+    void setId(int id);
+    void setPoints(int points);
+    void setGamesPlayed(int gamesPlayed);
+    void setTeamStrength(int teamStrength);
+    void setPlayerCount(int playerCount);
+    void setGoalieCount(int goalieCount);
+    void setPlayerTreeById(AVLTree<Player> *playerTreeById);
+    void setPlayerTreeByScore(AVLTree<Player> *playerTreeByScore);
+    void setTopScorer(Player *topScorer);
 };
 
 
-#endif //TEAM
+#endif //TEAM_h

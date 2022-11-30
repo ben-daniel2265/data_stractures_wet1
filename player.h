@@ -1,7 +1,7 @@
-#ifndef PLAYER
-#define PLAYER
+#ifndef PLAYER_h
+#define PLAYER_h
 
-#include "Team.h"
+#include "team.h"
 
 class Player {
     private:
@@ -18,30 +18,37 @@ class Player {
     Player * below_player_in_team;      // the player with the next worst score from the team
 
     public:
-    Player(int id, int goals, int games_played, int cards_recived, bool is_golie);
+    Player(int id, int goals, int gamesPlayed, int cardsRecived, bool isGoalie);
 
-    int get_id() const;
-    int get_goals() const;
-    int get_games_played() const;
-    int get_cards_recived() const;
-    bool is_goalie() const;
+    void setId(int id);
+    void setGoals(int goals);
+    void setGamesPlayed(int gamesPlayed);
+    void setCardsRecived(int cardsRecived);
+    void setIsGoalie(bool isGoalie);
+    void setTeam(Team *team);
+    void setAbovePlayer(Player *abovePlayer);
+    void setBelowPlayer(Player *belowPlayer);
+    void setAbovePlayerInTeam(Player *abovePlayerInTeam);
+    void setBelowPlayerInTeam(Player *belowPlayerInTeam);
 
-    Team& get_team() const;
-    Player& get_above_player() const;
-    Player& get_below_player() const;
-    Player& get_above_player_in_team() const;
-    Player& get_below_player_in_team() const;
+
+    int getId() const;
+    int getGoals() const;
+    int getGamesPlayed() const;
+    int getCardsRecived() const;
+    bool isGoalie() const;
+    Team *getTeam() const;
+    Player *getAbovePlayer() const;
+    Player *getBelowPlayer() const;
+    Player *getAbovePlayerInTeam() const;
+    Player *getBelowPlayerInTeam() const;
+
+
 
     void add_goals(int goals);
     void add_games_played(int games);
     void add_cards_recived(int cards);
 
-    void set_team(Team * team);
-    void set_above_player(Player * player);
-    void set_below_player(Player * player);
-    void set_above_player_in_team(Player * player);
-    void set_below_player_in_team(Player * player);
 };
 
-
-#endif //PLAYER
+#endif //PLAYER_h
