@@ -75,3 +75,16 @@ void Team::setPlayerTreeByScore(AVLTree<Player> *playerTreeByScore) {
 void Team::setTopScorer(Player *topScorer) {
     top_scorer = topScorer;
 }
+
+Team::Team(int id, int points) : id(id), points(points) {
+    games_played=0;
+    team_strength=0;
+    player_count=0;
+    goalie_count=0;
+    player_tree_by_id=nullptr;
+    player_tree_by_score=nullptr;
+    top_scorer=nullptr;
+
+}
+
+#endif //TEAM_cpp

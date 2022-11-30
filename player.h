@@ -3,6 +3,8 @@
 
 #include "team.h"
 
+class Team;
+
 class Player {
     private:
     int id;
@@ -37,7 +39,7 @@ class Player {
     int getGamesPlayed() const;
     int getCardsRecived() const;
     bool isGoalie() const;
-    Team *getTeam() const;
+    Team* getTeam() const;
     Player *getAbovePlayer() const;
     Player *getBelowPlayer() const;
     Player *getAbovePlayerInTeam() const;
