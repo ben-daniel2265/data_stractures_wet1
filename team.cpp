@@ -78,7 +78,7 @@ void Team::setTopScorer(Player *topScorer) {
 
 Team::Team(int id, int points) : id(id), points(points) {
     games_played=0;
-    team_strength=0;
+    team_strength=points;
     player_count=0;
     goalie_count=0;
     player_tree_by_id=nullptr;

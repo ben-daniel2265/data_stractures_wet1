@@ -2,18 +2,37 @@
 
 world_cup_t::world_cup_t()
 {
-	// TODO: Your code goes here
+	this->team_tree = new AVLTree<Team>();
+	this->players_by_id_tree = new AVLTree<Player>();
+	this->players_by_score_tree = new AVLTree<Player>();
+	this->active_teams = new AVLTree<Team>();
+
+	this->player_count = 0;
+	this->top_scorer = nullptr;
 }
 
 world_cup_t::~world_cup_t()
 {
-	// TODO: Your code goes here
 }
 
 
 StatusType world_cup_t::add_team(int teamId, int points)
 {
-	// TODO: Your code goes here
+	if(teamId <= 0 || points < 0){
+		return StatusType::INVALID_INPUT;
+	}
+
+	Team* team;
+
+	try{
+		team = new Team(teamId, points);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
+
+	this->team_tree->insert(team, compare_team_by_id); // צריך לבדוק שזה עבד
+
 	return StatusType::SUCCESS;
 }
 
@@ -100,3 +119,23 @@ output_t<int> world_cup_t::knockout_winner(int minTeamId, int maxTeamId)
 	return 2;
 }
 
+bool compare_team_by_id(Team* team1, Team* team2){
+	return team1->getId() >= team2->getId(); 
+}
+
+
+bool compare_player_by_id(Player* player1, Player* player2){
+	return player1->getId() >= player2->getId();
+}
+
+bool compare_player_by_score(Player* player1, Player* player2){
+	if(player1->getGoals() != player2->getGoals()){
+		return player1->getGoals() >= player2->getGoals();
+	}
+	else if(player1->getCardsRecived() != player2->getCardsRecived()){
+		return player1->getCardsRecived() >= player2->getCardsRecived();
+	}
+	else{
+		return player1->getId() >= player2->getId();
+	}
+}
