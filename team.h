@@ -10,10 +10,6 @@ class Team {
     private:
     int id;
     int points;
-public:
-    Team(int id, int points);
-
-private:
     int games_played;
     int team_strength;
     int player_count;
@@ -26,6 +22,7 @@ private:
 
     public:
 
+    Team(int id, int points);
     int getId() const;
     int getPoints() const;
     int getGamesPlayed() const;
