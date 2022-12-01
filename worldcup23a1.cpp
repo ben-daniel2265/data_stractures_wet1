@@ -135,23 +135,23 @@ output_t<int> world_cup_t::knockout_winner(int minTeamId, int maxTeamId)
 	return 2;
 }
 
-bool compare_team_by_id(Team* team1, Team* team2){
-	return team1->getId() >= team2->getId(); 
+int compare_team_by_id(Team* team1, Team* team2){
+	return team1->getId() - team2->getId(); 
 }
 
 
-bool compare_player_by_id(Player* player1, Player* player2){
-	return player1->getId() >= player2->getId();
+int compare_player_by_id(Player* player1, Player* player2){
+	return player1->getId() - player2->getId();
 }
 
 bool compare_player_by_score(Player* player1, Player* player2){
 	if(player1->getGoals() != player2->getGoals()){
-		return player1->getGoals() >= player2->getGoals();
+		return player1->getGoals() - player2->getGoals();
 	}
 	else if(player1->getCardsRecived() != player2->getCardsRecived()){
-		return player1->getCardsRecived() >= player2->getCardsRecived();
+		return player1->getCardsRecived() - player2->getCardsRecived();
 	}
 	else{
-		return player1->getId() >= player2->getId();
+		return player1->getId() - player2->getId();
 	}
 }
