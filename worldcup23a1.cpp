@@ -31,14 +31,30 @@ StatusType world_cup_t::add_team(int teamId, int points)
 		return StatusType::ALLOCATION_ERROR;
 	}
 
-	this->team_tree->insert(team, compare_team_by_id); // צריך לבדוק שזה עבד
+	if(this->team_tree->find(team, compare_team_by_id) != nullptr) return StatusType::FAILURE;
+
+	this->team_tree->insert(team, compare_team_by_id); 
 
 	return StatusType::SUCCESS;
 }
 
 StatusType world_cup_t::remove_team(int teamId)
 {
-	// TODO: Your code goes here
+	if(teamId <= 0){
+		return StatusType::INVALID_INPUT;
+	}
+
+	Team* team = this->team_tree->find(team, compare_team_by_id);
+
+	if(team == nullptr){
+		return StatusType::FAILURE;
+	}
+	else if(team->getPlayerCount() == 0){
+		this->team_tree->remove(team, compare_team_by_id);
+		delete team;
+		return StatusType::SUCCESS;
+	}
+
 	return StatusType::FAILURE;
 }
 
