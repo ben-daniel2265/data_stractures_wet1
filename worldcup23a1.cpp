@@ -31,9 +31,12 @@ StatusType world_cup_t::add_team(int teamId, int points)
 		return StatusType::ALLOCATION_ERROR;
 	}
 
-	if(this->team_tree->find(team, compare_team_by_id) != nullptr) return StatusType::FAILURE;
+	if(this->team_tree->findValue(team, compare_team_by_id) != nullptr){
+		delete team;
+		return StatusType::FAILURE;
+	}
 
-	this->team_tree->insert(team, compare_team_by_id); 
+	this->team_tree->insertValue(team, compare_team_by_id); 
 
 	return StatusType::SUCCESS;
 }
@@ -44,14 +47,18 @@ StatusType world_cup_t::remove_team(int teamId)
 		return StatusType::INVALID_INPUT;
 	}
 
-	Team* team = this->team_tree->find(team, compare_team_by_id);
+	Team* tempTeam = new Team(teamId, 0);
+	AVLTree<Team>::Node* teamNode = this->team_tree->findValue(tempTeam, compare_team_by_id);
+	delete tempTeam;
 
-	if(team == nullptr){
+	if(teamNode == nullptr){
 		return StatusType::FAILURE;
 	}
-	else if(team->getPlayerCount() == 0){
-		this->team_tree->remove(team, compare_team_by_id);
+	else if(teamNode->value->getPlayerCount() == 0){
+		Team* team = teamNode->value;
+		this->team_tree->removeValue(team, compare_team_by_id);
 		delete team;
+
 		return StatusType::SUCCESS;
 	}
 
@@ -61,7 +68,22 @@ StatusType world_cup_t::remove_team(int teamId)
 StatusType world_cup_t::add_player(int playerId, int teamId, int gamesPlayed,
                                    int goals, int cards, bool goalKeeper)
 {
-	// TODO: Your code goes here
+	if(teamId <= 0 || playerId <= 0 || gamesPlayed < 0 || goals < 0 || cards < 0){
+		return StatusType::INVALID_INPUT;
+	}
+
+	if(gamesPlayed == 0 && (cards > 0 || goals > 0)){
+		return StatusType::INVALID_INPUT;
+	}
+
+	Team* tempTeam = new Team(teamId, 0);
+	AVLTree<Team>::Node* teamNode = this->team_tree->findValue(tempTeam, compare_team_by_id);
+	delete tempTeam;
+
+	if(teamNode == nullptr) return StatusType::FAILURE;
+	
+
+
 	return StatusType::SUCCESS;
 }
 

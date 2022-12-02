@@ -35,8 +35,6 @@ class AVL{
                 }
         };
         node * root = NULL;
-        int neeee;
-
 
         void insert(T x){
             root=insertUtil(root, x);
@@ -65,6 +63,7 @@ class AVL{
             return newhead;
         }
 
+
         node * leftRotation(node * head){
             node * newhead = head->right;
             head->right = newhead->left;
@@ -83,7 +82,6 @@ class AVL{
 
         node * insertUtil(node * head, T x){
             if(head==NULL){
-                n+=1;
                 node * temp = new node(x);
                 return temp;
             }

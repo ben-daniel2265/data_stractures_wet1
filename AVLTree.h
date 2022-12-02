@@ -189,6 +189,30 @@ class AVLTree {
             return find(head->right, value, cmp_func);
         }
     }
+
+    Node* findDad(Node* head, T* value, int(*cmp_func)(T* t1, T* t2)){
+        if(head == nullptr) return nullptr;
+
+        int compare_result = cmp_func(value, head->value);
+        Node* temp;
+    
+        if(compare_result == 0){
+            return nullptr;
+        }
+
+        else if(compare_result < 0){
+            temp = find(head->left, value, cmp_func);
+            if(temp == nullptr) return head;
+            return temp;
+        }
+        else{
+            temp = find(head->right, value, cmp_func);
+            if(temp == nullptr) return head;
+            return temp;
+        }
+    }
+
+
 };
 
 /*

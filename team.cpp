@@ -3,7 +3,6 @@
 
 #include "team.h"
 
-
 int Team::getId() const {
     return id;
 }
