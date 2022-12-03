@@ -13,7 +13,7 @@ int compare_player_by_score(Player* player1, Player* player2){
 		return player1->getGoals() - player2->getGoals();
 	}
 	else if(player1->getCardsRecived() != player2->getCardsRecived()){
-		return player1->getCardsRecived() - player2->getCardsRecived();
+		return player2->getCardsRecived() - player1->getCardsRecived();
 	}
 	else{
 		return player1->getId() - player2->getId();
@@ -33,6 +33,7 @@ world_cup_t::world_cup_t()
 
 world_cup_t::~world_cup_t()
 {
+
 }
 
 
@@ -170,6 +171,7 @@ StatusType world_cup_t::add_player(int playerId, int teamId, int gamesPlayed,
 	this->players_by_id_tree->insertValue(p, compare_player_by_id);
 	this->players_by_score_tree->insertValue(p, compare_player_by_score);
 
+
 	teamNode->value->setPlayerCount(teamNode->value->getPlayerCount() + 1);
 	this->player_count++;
 
@@ -203,12 +205,67 @@ StatusType world_cup_t::add_player(int playerId, int teamId, int gamesPlayed,
 		this->active_teams->insertValue(teamNode->value, compare_team_by_id);
 	}
 
+	teamNode->value->printTeam();
+
 	return StatusType::SUCCESS;
 }
 
 StatusType world_cup_t::remove_player(int playerId)
 {
-	// TODO: Your code goes here
+	if(playerId <= 0) return StatusType::INVALID_INPUT;
+
+	Player* tempP = new Player(playerId, 0,0,0,0);
+	AVLTree<Player>::Node* playerNode = this->players_by_id_tree->findValue(tempP, compare_player_by_id);
+	delete tempP;
+
+	if(playerNode == nullptr) return StatusType::FAILURE;
+
+	Player* p = playerNode->value;
+	Team* playerTeam = p->getTeam();
+
+	playerTeam->getPlayerTreeById()->removeValue(p, compare_player_by_id);
+	playerTeam->getPlayerTreeByScore()->removeValue(p, compare_player_by_score);
+	this->players_by_id_tree->removeValue(p, compare_player_by_id);
+	this->players_by_score_tree->removeValue(p, compare_player_by_score);
+
+	if(compare_player_by_score(p, playerTeam->getTopScorer()) == 0){
+		playerTeam->setTopScorer(p->getBelowPlayerInTeam());
+	}
+
+	if(compare_player_by_score(p, this->top_scorer) == 0){
+		this->top_scorer = p->getBelowPlayer();
+	}
+
+	bool activeBefore = playerTeam->getGoalieCount() > 0 && playerTeam->getPlayerCount() >= 11;
+
+	playerTeam->setPlayerCount(playerTeam->getPlayerCount() - 1);
+
+	if(p->isGoalie()){
+		playerTeam->setGoalieCount(playerTeam->getGoalieCount() - 1);
+	}
+
+	bool activeAfter = playerTeam->getGoalieCount() > 0 && playerTeam->getPlayerCount() >= 11;
+
+	if(activeBefore && !activeAfter){
+		this->active_teams->removeValue(playerTeam, compare_team_by_id);
+	}
+
+	playerTeam->setTeamStrength(playerTeam->getTeamStrength() - p->getGoals() + p->getCardsRecived());
+
+	Player* pAbove = p->getAbovePlayer();
+	Player* pBelow = p->getBelowPlayer();
+	Player* pAboveInTeam = p->getAbovePlayerInTeam();
+	Player* pBelowInTeam = p->getBelowPlayerInTeam();
+
+	if(pAbove != nullptr) pAbove->setBelowPlayer(pBelow);
+	if(pBelow != nullptr) pBelow->setAbovePlayer(pAbove);
+	if(pAboveInTeam != nullptr) pAboveInTeam->setBelowPlayerInTeam(pBelowInTeam);
+	if(pBelowInTeam != nullptr) pBelowInTeam->setAbovePlayerInTeam(pAboveInTeam);
+
+	delete p;
+
+	playerTeam->printTeam();
+
 	return StatusType::SUCCESS;
 }
 
@@ -283,13 +340,15 @@ int main(){
     world_cup_t t = world_cup_t();
 
 	t.add_team(1, 0);
-	t.add_player(1, 1, 0,0,0,0);
-	
-	StatusType s = t.add_player(1, 1, 0,0,0,0);
+	t.add_player(1, 1, 1,2,1,0);
+	t.add_player(2, 1, 5,7,3,0);
+	t.add_player(3, 1, 5,1,0,0);
+	t.add_player(4, 1, 2,2,0,0);
+	t.add_player(5, 1, 6,1,1,0);
+	t.add_player(6, 1, 1,0,0,0);
 
-    if(s == StatusType::SUCCESS){
-		cout << "success";
-	}
+	t.remove_player(2);
+	t.remove_player(4);
 
     return 0;
 }

@@ -103,4 +103,8 @@ void Player::add_games_played(int games) {
     this->games_played+=games;
 }
 
+void Player::printPlayer(){
+    cout << "(Id: " << this->id << ", goals: " << this->goals << ", cards: " << this->cards_recived << ")" << endl;
+}
+
 #endif // PLAYER_cpp

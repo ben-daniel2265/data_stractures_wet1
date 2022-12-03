@@ -46,6 +46,10 @@ class AVLTree {
         return findDad(root, value, cmp_func);
     }
 
+    void doOnTreeInOrder(void(*func)(T* t)){
+        doOnTreeInOrder(root, func);
+    }
+
 
     private: 
     int height(Node* head){
@@ -214,6 +218,13 @@ class AVLTree {
         }
     }
 
+    void doOnTreeInOrder(Node* head, void(*func)(T* t)){
+        if(head == nullptr) return;
+
+        doOnTreeInOrder(head->left, func);
+        func(head->value);
+        doOnTreeInOrder(head->right, func);
+    }
 
 };
 

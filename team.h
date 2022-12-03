@@ -42,6 +42,8 @@ class Team {
     void setPlayerTreeById(AVLTree<Player> *playerTreeById);
     void setPlayerTreeByScore(AVLTree<Player> *playerTreeByScore);
     void setTopScorer(Player *topScorer);
+
+    void printTeam();
 };
 
 

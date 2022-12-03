@@ -86,4 +86,27 @@ Team::Team(int id, int points) : id(id), points(points) {
 
 }
 
+void printPlayer(Player* p){
+    p->printPlayer();
+}
+
+void Team::printTeam(){
+    cout << "(Id: " << this->id << ", Player count: " << this->player_count << ")" << endl;
+
+    cout << endl;
+
+    cout << "Players by id:" << endl;
+    this->player_tree_by_id->doOnTreeInOrder(printPlayer);
+
+    cout << endl;
+
+    cout << "Players by score:" << endl;
+    this->player_tree_by_score->doOnTreeInOrder(printPlayer);
+
+    cout << endl;
+}
+
+
+
+
 #endif //TEAM_cpp

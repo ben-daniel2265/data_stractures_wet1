@@ -51,6 +51,7 @@ class Player {
     void add_games_played(int games);
     void add_cards_recived(int cards);
 
+    void printPlayer();
 };
 
 #endif //PLAYER_h
