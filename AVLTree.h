@@ -42,6 +42,10 @@ class AVLTree {
         return find(root, value, cmp_func);
     }
 
+    Node* findDad(T* value, int(*cmp_func)(T* t1, T* t2)){
+        return findDad(root, value, cmp_func);
+    }
+
 
     private: 
     int height(Node* head){
@@ -79,7 +83,6 @@ class AVLTree {
 
         int compare_result = cmp_func(value, head->value);
 
-        cout << compare_result << endl;
         if(compare_result < 0){
             head->left = insert(head->left, value, cmp_func);
         }
@@ -102,7 +105,6 @@ class AVLTree {
         }
         else if(balance < -1){
             if(cmp_func(value, head->right->value) > 0){
-                cout << balance << endl;
                 return rotateLeft(head);
             }
             else{
@@ -201,12 +203,12 @@ class AVLTree {
         }
 
         else if(compare_result < 0){
-            temp = find(head->left, value, cmp_func);
+            temp = findDad(head->left, value, cmp_func);
             if(temp == nullptr) return head;
             return temp;
         }
         else{
-            temp = find(head->right, value, cmp_func);
+            temp = findDad(head->right, value, cmp_func);
             if(temp == nullptr) return head;
             return temp;
         }

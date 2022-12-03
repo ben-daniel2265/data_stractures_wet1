@@ -80,8 +80,8 @@ Team::Team(int id, int points) : id(id), points(points) {
     team_strength=points;
     player_count=0;
     goalie_count=0;
-    player_tree_by_id=nullptr;
-    player_tree_by_score=nullptr;
+    player_tree_by_id=new AVLTree<Player>();
+    player_tree_by_score=new AVLTree<Player>();
     top_scorer=nullptr;
 
 }
