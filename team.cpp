@@ -52,7 +52,7 @@ void Team::setGamesPlayed(int gamesPlayed) {
 }
 
 void Team::setTeamStrength(int teamStrength) {
-    team_strength = teamStrength;
+    team_strength = teamStrength + points;
 }
 
 void Team::setPlayerCount(int playerCount) {
@@ -77,7 +77,7 @@ void Team::setTopScorer(Player *topScorer) {
 
 Team::Team(int id, int points) : id(id), points(points) {
     games_played=0;
-    team_strength=points;
+    team_strength=0;
     player_count=0;
     goalie_count=0;
     player_tree_by_id=new AVLTree<Player>();
@@ -91,7 +91,7 @@ void printPlayer(Player* p){
 }
 
 void Team::printTeam(){
-    cout << "(Id: " << this->id << ", Player count: " << this->player_count << ")" << endl;
+    cout << "(Id: " << this->id << ", Player count: " << this->player_count << ", Strength: " <<  this->team_strength <<  ")" << endl;
 
     cout << endl;
 

@@ -1,0 +1,1 @@
+g++ player.h player.cpp team.h team.cpp AVLTree.h worldcup23a1.h worldcup23a1.cpp

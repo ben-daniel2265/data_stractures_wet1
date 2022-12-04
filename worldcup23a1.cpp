@@ -165,7 +165,6 @@ StatusType world_cup_t::add_player(int playerId, int teamId, int gamesPlayed,
 		}
 	}
 
-
 	teamNode->value->getPlayerTreeById()->insertValue(p, compare_player_by_id);
 	teamNode->value->getPlayerTreeByScore()->insertValue(p, compare_player_by_score);
 	this->players_by_id_tree->insertValue(p, compare_player_by_id);
@@ -239,6 +238,7 @@ StatusType world_cup_t::remove_player(int playerId)
 	bool activeBefore = playerTeam->getGoalieCount() > 0 && playerTeam->getPlayerCount() >= 11;
 
 	playerTeam->setPlayerCount(playerTeam->getPlayerCount() - 1);
+	this->player_count--;
 
 	if(p->isGoalie()){
 		playerTeam->setGoalieCount(playerTeam->getGoalieCount() - 1);
@@ -278,20 +278,81 @@ StatusType world_cup_t::update_player_stats(int playerId, int gamesPlayed,
 
 StatusType world_cup_t::play_match(int teamId1, int teamId2)
 {
-	// TODO: Your code goes here
+	if(teamId1 <= 0 || teamId2 <=0 || teamId1 == teamId2){
+		return StatusType::INVALID_INPUT;
+	}
+
+	Team* temp1 = new Team(teamId1, 0);
+	Team* temp2 = new Team(teamId2, 0);
+
+	AVLTree<Team>::Node* teamNode1 = this->team_tree->findValue(temp1, compare_team_by_id);
+	AVLTree<Team>::Node* teamNode2 = this->team_tree->findValue(temp2, compare_team_by_id);
+
+	delete temp1;
+	delete temp2;
+
+	if(teamNode1 == nullptr || teamNode2 == nullptr){
+		return StatusType::FAILURE;
+	}
+
+	bool isActive1 = teamNode1->value->getGoalieCount() > 0 && teamNode1->value->getPlayerCount() >= 11;
+	bool isActive2 = teamNode2->value->getGoalieCount() > 0 && teamNode2->value->getPlayerCount() >= 11;
+
+	if(!isActive1 || !isActive2){
+		return StatusType::FAILURE;
+	}
+
+	int matchResult = teamNode1->value->getTeamStrength() - teamNode2->value->getTeamStrength();
+
+	teamNode1->value->setGamesPlayed(teamNode1->value->getGamesPlayed() + 1);
+	teamNode2->value->setGamesPlayed(teamNode2->value->getGamesPlayed() + 1);
+
+	if(matchResult == 0){
+		teamNode1->value->setPoints(teamNode1->value->getPoints() + 1);
+		teamNode2->value->setPoints(teamNode2->value->getPoints() + 1);
+	}
+	else if(matchResult > 0){
+		teamNode1->value->setPoints(teamNode1->value->getPoints() + 3);
+	}
+	else{
+		teamNode2->value->setPoints(teamNode2->value->getPoints() + 3);
+	}
+
 	return StatusType::SUCCESS;
 }
 
 output_t<int> world_cup_t::get_num_played_games(int playerId)
 {
-	// TODO: Your code goes here
-	return 22;
+	if(playerId <= 0){
+		return StatusType::INVALID_INPUT;
+	}
+
+	Player* temp = new Player(playerId, 0, 0, 0, 0);
+	AVLTree<Player>::Node* playerNode = this->players_by_id_tree->findValue(temp, compare_player_by_id); 
+	delete temp;
+
+	if(playerNode == nullptr){
+		return StatusType::FAILURE;
+	}
+
+	return playerNode->value->getGamesPlayed() + playerNode->value->getTeam()->getGamesPlayed();
 }
 
 output_t<int> world_cup_t::get_team_points(int teamId)
 {
-	// TODO: Your code goes here
-	return 30003;
+	if(teamId <= 0){
+		return StatusType::INVALID_INPUT;
+	}
+
+	Team* temp = new Team(teamId, 0);
+	AVLTree<Team>::Node* teamNode = this->team_tree->findValue(temp, compare_team_by_id); 
+	delete temp;
+
+	if(teamNode == nullptr){
+		return StatusType::FAILURE;
+	}
+
+	return teamNode->value->getPoints();
 }
 
 StatusType world_cup_t::unite_teams(int teamId1, int teamId2, int newTeamId)
@@ -302,22 +363,79 @@ StatusType world_cup_t::unite_teams(int teamId1, int teamId2, int newTeamId)
 
 output_t<int> world_cup_t::get_top_scorer(int teamId)
 {
-	// TODO: Your code goes here
-	return 2008;
+	if(teamId == 0){
+		return StatusType::INVALID_INPUT;
+	}
+
+	if(teamId < 0){
+		if(this->top_scorer == nullptr) return StatusType::FAILURE;
+
+		return this->top_scorer->getId();
+	}
+
+	Team* temp = new Team(teamId, 0);
+	AVLTree<Team>::Node* teamNode = this->team_tree->findValue(temp, compare_team_by_id);
+	delete temp;
+
+	if(teamNode == nullptr) return StatusType::FAILURE;
+	if(teamNode->value->getTopScorer() == nullptr) return StatusType::FAILURE;
+
+	return teamNode->value->getTopScorer()->getId();
 }
 
 output_t<int> world_cup_t::get_all_players_count(int teamId)
 {
-	// TODO: Your code goes here
-    static int i = 0;
-    return (i++==0) ? 11 : 2;
+	if(teamId == 0){
+		return StatusType::INVALID_INPUT;
+	}
+
+	if(teamId < 0){
+		return this->player_count;
+	}
+
+	Team* temp = new Team(teamId, 0);
+	AVLTree<Team>::Node* teamNode = this->team_tree->findValue(temp, compare_team_by_id);
+	delete temp;
+
+	if(teamNode == nullptr) return StatusType::FAILURE;
+
+	return teamNode->value->getPlayerCount();
 }
 
 StatusType world_cup_t::get_all_players(int teamId, int *const output)
 {
-	// TODO: Your code goes here
-    output[0] = 4001;
-    output[1] = 4002;
+	if(teamId == 0 || output == nullptr) return StatusType::INVALID_INPUT;
+
+	if(teamId < 0){
+		if(this->get_all_players_count(-1).ans() == 0) return StatusType::FAILURE;
+
+		Player** tempArray = new Player*[this->get_all_players_count(-1).ans()];
+		this->players_by_score_tree->intoArray(tempArray);
+
+		for(int i = 0; i < this->get_all_players_count(-1).ans(); i++){
+			output[i] = tempArray[i]->getId();
+		}
+
+		delete[] tempArray;
+		return StatusType::SUCCESS;
+	}
+
+	Team* temp = new Team(teamId, 0);
+	AVLTree<Team>::Node* teamNode = this->team_tree->findValue(temp, compare_team_by_id);
+	delete temp;
+
+	if(teamNode == nullptr) return StatusType::FAILURE;
+
+	if(teamNode->value->getPlayerCount() == 0) return StatusType::FAILURE;
+
+	Player** tempArray = new Player*[teamNode->value->getPlayerCount()];
+	teamNode->value->getPlayerTreeByScore()->intoArray(tempArray);
+
+	for(int i = 0; i < teamNode->value->getPlayerCount(); i++){
+		output[i] = tempArray[i]->getId();
+	}
+	delete[] tempArray;
+
 	return StatusType::SUCCESS;
 }
 
@@ -339,16 +457,30 @@ output_t<int> world_cup_t::knockout_winner(int minTeamId, int maxTeamId)
 int main(){
     world_cup_t t = world_cup_t();
 
-	t.add_team(1, 0);
+	t.add_team(1, 3);
+
 	t.add_player(1, 1, 1,2,1,0);
 	t.add_player(2, 1, 5,7,3,0);
 	t.add_player(3, 1, 5,1,0,0);
-	t.add_player(4, 1, 2,2,0,0);
-	t.add_player(5, 1, 6,1,1,0);
-	t.add_player(6, 1, 1,0,0,0);
 
-	t.remove_player(2);
-	t.remove_player(4);
+
+	t.add_team(2, 1);
+
+	t.add_player(4, 2, 2,2,0,0);
+	t.add_player(5, 2, 6,1,1,0);
+	t.add_player(6, 2, 1,0,0,0);
+
+	t.play_match(1, 2);
+
+	t.add_player(7, 1, 1,0,0,0);
+
+	int output[3];
+
+	t.get_all_players(2, output);
+
+	for(int i = 0; i < 3; i++){
+		cout << output[i] << endl;
+	}
 
     return 0;
 }

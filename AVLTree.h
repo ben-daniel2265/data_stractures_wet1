@@ -50,6 +50,13 @@ class AVLTree {
         doOnTreeInOrder(root, func);
     }
 
+    void intoArray(T** array){
+        int index = 0;
+        if(this->root != 0){
+            intoArray(root, array, &index);
+        }
+    }
+
 
     private: 
     int height(Node* head){
@@ -226,6 +233,16 @@ class AVLTree {
         doOnTreeInOrder(head->right, func);
     }
 
+    void intoArray(Node* head, T** array, int *index){
+        if(head == nullptr) return;
+        
+        intoArray(head->left, array, index);
+
+        array[*index] = head->value;
+        (*index)++;
+
+        intoArray(head->right, array, index);
+    }
 };
 
 /*
