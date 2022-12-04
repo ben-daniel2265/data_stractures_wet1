@@ -23,6 +23,7 @@ class Team {
     public:
 
     Team(int id, int points);
+    ~Team();
     int getId() const;
     int getPoints() const;
     int getGamesPlayed() const;

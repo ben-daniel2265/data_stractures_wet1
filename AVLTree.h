@@ -22,14 +22,25 @@ class AVLTree {
                 this->left = nullptr;
                 this->right = nullptr;
             }
+            ~Node()
+            {
+                delete this->right;
+                delete this->left;
+            }
     };
 
     Node* root;
 
     AVLTree(){
+
         this->root = nullptr;
     };
-
+    
+    void delete_values()
+    {
+        delete_values(root);
+    }
+    
     void insertValue(T* value, int(*cmp_func)(T* t1, T* t2)){
         this->root = insert(this->root, value, cmp_func);
     }
@@ -242,6 +253,14 @@ class AVLTree {
         (*index)++;
 
         intoArray(head->right, array, index);
+    }
+ 
+    void delete_values(Node* head){
+        if(head == nullptr) return;
+        delete_values(head->left);
+        delete_values(head->right);
+        delete head->value;
+        delete head;
     }
 };
 

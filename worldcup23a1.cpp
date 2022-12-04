@@ -33,9 +33,11 @@ world_cup_t::world_cup_t()
 
 world_cup_t::~world_cup_t()
 {
-
+	players_by_id_tree->delete_values();
+	delete players_by_score_tree;
+	team_tree->delete_values();
+	delete active_teams;
 }
-
 
 StatusType world_cup_t::add_team(int teamId, int points)
 {
@@ -204,7 +206,7 @@ StatusType world_cup_t::add_player(int playerId, int teamId, int gamesPlayed,
 		this->active_teams->insertValue(teamNode->value, compare_team_by_id);
 	}
 
-	teamNode->value->printTeam();
+	//teamNode->value->printTeam();
 
 	return StatusType::SUCCESS;
 }
@@ -453,7 +455,7 @@ output_t<int> world_cup_t::knockout_winner(int minTeamId, int maxTeamId)
 
 
 
-
+/*
 int main(){
     world_cup_t t = world_cup_t();
 
@@ -483,4 +485,4 @@ int main(){
 	}
 
     return 0;
-}
+}*/
