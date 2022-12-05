@@ -81,6 +81,13 @@ class AVLTree {
         return countInRange(this->root, minValue, maxValue, cmp_func);
     }
 
+    void rangedIntoArray(T** array, T* minValue, T* maxValue, int(*cmp_func)(T* t1, T* t2)){
+        int index = 0;
+        if(this->root != 0){
+            rangedIntoArray(root, array, &index, minValue, maxValue, cmp_func);
+        }
+    }
+
 
     private: 
 
@@ -99,6 +106,20 @@ class AVLTree {
         if(maxCompare < 0) sumRight = countInRange(head->right, minValue, maxValue, cmp_func);
 
         return sumLeft + isInRange + sumRight;
+    }
+
+    void rangedIntoArray(Node* head, T** array, int* index, T* minValue, T* maxValue, int(*cmp_func)(T* t1, T* t2)){
+        if(head == nullptr) return;
+
+        int minComare = cmp_func(head->value, minValue);
+        int maxCompare = cmp_func(head->value, maxValue);
+
+        if(minComare > 0) rangedIntoArray(head->left, array, index, minValue, maxValue, cmp_func);
+
+        array[*index] = head->value;
+        (*index)++;
+
+        if(maxCompare < 0) rangedIntoArray(head->right, array, index, minValue, maxValue, cmp_func);
     }
 
 

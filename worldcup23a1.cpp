@@ -40,6 +40,11 @@ world_cup_t::~world_cup_t()
 	this->team_tree->delete_hollow_tree();
 	this->players_by_score_tree->delete_hollow_tree();
 	this->active_teams->delete_hollow_tree();
+
+	delete players_by_id_tree;
+	delete team_tree;
+	delete players_by_score_tree;
+	delete active_teams;
 }
 
 StatusType world_cup_t::add_team(int teamId, int points)
@@ -155,7 +160,7 @@ StatusType world_cup_t::add_player(int playerId, int teamId, int gamesPlayed,
 		Player* tempDad = this->players_by_score_tree->findDad(p, compare_player_by_score)->value;
 		int compareToDad = compare_player_by_score(p, tempDad);
 
-		Player* tempPlayer;
+		Player* tempPlayer = nullptr;
 
 		if(compareToDad < 0){
 			tempPlayer = tempDad->getBelowPlayer();
@@ -216,7 +221,6 @@ StatusType world_cup_t::add_player(int playerId, int teamId, int gamesPlayed,
 		this->active_teams->insertValue(teamNode->value, compare_team_by_id);
 	}
 
-	//teamNode->value->printTeam();
 
 	return StatusType::SUCCESS;
 }
@@ -618,12 +622,59 @@ output_t<int> world_cup_t::get_closest_player(int playerId, int teamId)
 
 output_t<int> world_cup_t::knockout_winner(int minTeamId, int maxTeamId)
 {
-	// TODO: Your code goes here
-	return 2;
+	if(minTeamId < 0 || maxTeamId < 0 || maxTeamId < minTeamId){
+		return StatusType::INVALID_INPUT;
+	}
+
+	Team* temp1 = new Team(minTeamId, 0);
+	Team* temp2 = new Team(maxTeamId, 0);
+	int numTeams = this->active_teams->countInRange(temp1, temp2, compare_team_by_id);
+
+	if(numTeams == 0){
+		delete temp1;
+		delete temp2;
+		return StatusType::FAILURE;
+	}
+
+	Team** teams = new Team*[numTeams];
+
+	this->active_teams->rangedIntoArray(teams, temp1, temp2, compare_team_by_id);
+
+	delete temp1;
+	delete temp2;
+
+	int teamStats[numTeams][2];
+
+	for(int i = 0; i < numTeams; i++){
+		teamStats[i][0] = teams[i]->getId();
+		teamStats[i][1] = teams[i]->getTeamStrength();
+	}
+
+	delete[] teams;
+
+	int jumpSize = 2;
+	int index = 0;
+	int matchResult = 0;
+
+	while(jumpSize / 2 < numTeams){
+		while(jumpSize*index + jumpSize / 2 < numTeams){
+			matchResult = teamStats[index*jumpSize][1] - teamStats[index*jumpSize + jumpSize / 2][1];
+			teamStats[index*jumpSize][1] += teamStats[index*jumpSize + jumpSize / 2][1] + 3;
+
+			if(matchResult <= 0){
+				teamStats[index*jumpSize][0] = teamStats[index*jumpSize + jumpSize / 2][0];
+			}
+
+			index++;
+		}
+		jumpSize *= 2;
+	}
+
+	int finalId = teamStats[0][0];
+	delete[] teamStats;
+
+	return finalId;
 }
-
-
-
 
 
 /*int main(){

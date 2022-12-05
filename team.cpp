@@ -90,6 +90,8 @@ Team::~Team()
 {
     player_tree_by_id->delete_hollow_tree();
     player_tree_by_score->delete_hollow_tree();
+    delete player_tree_by_id;
+    delete player_tree_by_score;
 }
 
 void printPlayer(Player* p){
