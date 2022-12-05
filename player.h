@@ -45,8 +45,6 @@ class Player {
     Player *getAbovePlayerInTeam() const;
     Player *getBelowPlayerInTeam() const;
 
-
-
     void add_goals(int goals);
     void add_games_played(int games);
     void add_cards_recived(int cards);

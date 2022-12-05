@@ -22,25 +22,34 @@ class AVLTree {
                 this->left = nullptr;
                 this->right = nullptr;
             }
-            ~Node()
-            {
-                delete this->right;
-                delete this->left;
-            }
+
+            ~Node() = default;
     };
 
     Node* root;
 
-    AVLTree(){
+    Node* getRoot(){
+        return root;
+    }
 
-        this->root = nullptr;
-    };
-    
+    void delete_hollow_tree(){
+        delete_hollow_tree(this->root);
+    }
+
+    void delete_hollow_tree(Node* head){
+        if(head == nullptr){
+            return;
+        }
+        delete_hollow_tree(head->left);
+        delete_hollow_tree(head->right);
+        delete head;
+    }
+
     void delete_values()
     {
         delete_values(root);
     }
-    
+
     void insertValue(T* value, int(*cmp_func)(T* t1, T* t2)){
         this->root = insert(this->root, value, cmp_func);
     }
@@ -68,8 +77,32 @@ class AVLTree {
         }
     }
 
+    int countInRange(T* minValue, T* maxValue, int(*cmp_func)(T* t1, T* t2)){
+        return countInRange(this->root, minValue, maxValue, cmp_func);
+    }
+
 
     private: 
+
+    int countInRange(Node* head, T* minValue, T* maxValue, int(*cmp_func)(T* t1, T* t2)){
+        if(head == nullptr) return 0;
+
+        int sumLeft = 0;
+        int sumRight = 0;
+        int isInRange = 0;
+
+        int minComare = cmp_func(head->value, minValue);
+        int maxCompare = cmp_func(head->value, maxValue);
+
+        if(minComare > 0) sumLeft = countInRange(head->left, minValue, maxValue, cmp_func);
+        if(minComare >= 0 && maxCompare <= 0) isInRange = 1;
+        if(maxCompare < 0) sumRight = countInRange(head->right, minValue, maxValue, cmp_func);
+
+        return sumLeft + isInRange + sumRight;
+    }
+
+
+
     int height(Node* head){
         if(head == nullptr) return 0;
         return head->height;
@@ -256,11 +289,13 @@ class AVLTree {
     }
  
     void delete_values(Node* head){
-        if(head == nullptr) return;
+        if(head == nullptr){
+            return;
+        }
         delete_values(head->left);
         delete_values(head->right);
         delete head->value;
-        delete head;
+        head->value = nullptr;
     }
 };
 

@@ -88,8 +88,8 @@ Team::Team(int id, int points) : id(id), points(points) {
 
 Team::~Team()
 {
-    delete player_tree_by_id;
-    delete player_tree_by_score;
+    player_tree_by_id->delete_hollow_tree();
+    player_tree_by_score->delete_hollow_tree();
 }
 
 void printPlayer(Player* p){

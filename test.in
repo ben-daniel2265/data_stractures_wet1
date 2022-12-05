@@ -38,7 +38,9 @@ add_player 3010 3 30 0 0 true
 add_player 3011 3 30 0 0 true
 add_player 4001 4 2 1 2 false
 add_player 4002 4 2 2 2 false
+get_all_players -1
 update_player_stats 3011 2 1 1
+get_all_players -1
 play_match 2 3
 play_match 1 2
 get_num_played_games 2003

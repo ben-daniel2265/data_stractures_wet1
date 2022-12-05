@@ -1,0 +1,7 @@
+add_team 1 10000
+add_team 2 20000
+add_team 3 30000
+add_player 1001 1 10 0 0 false
+add_player 1002 1 10 0 0 false
+add_player 1003 1 10 0 0 false
+add_player 1004 1 10 0 2 false

@@ -66,7 +66,7 @@ public:
 	output_t<int> get_closest_player(int playerId, int teamId);
 	
 	output_t<int> knockout_winner(int minTeamId, int maxTeamId);
-	
+
 	// } </DO-NOT-MODIFY>
 };
 

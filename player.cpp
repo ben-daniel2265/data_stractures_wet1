@@ -8,6 +8,10 @@
 
 Player::Player(int id, int goals, int gamesPlayed, int cardsRecived, bool isGoalie) : id(id), goals(goals),
     games_played(gamesPlayed), cards_recived(cardsRecived), is_goalie(isGoalie){
+    above_player = nullptr;
+    below_player = nullptr;
+    above_player_in_team = nullptr;
+    below_player_in_team = nullptr;
 }
 
 void Player::setId(int id) {
