@@ -16,7 +16,7 @@ int Team::getGamesPlayed() const {
 }
 
 int Team::getTeamStrength() const {
-    return team_strength;
+    return team_strength + points;
 }
 
 int Team::getPlayerCount() const {
@@ -52,7 +52,11 @@ void Team::setGamesPlayed(int gamesPlayed) {
 }
 
 void Team::setTeamStrength(int teamStrength) {
-    team_strength = teamStrength + points;
+    team_strength = teamStrength;
+}
+
+void Team::addStrength(int strength){
+    this->team_strength += strength;
 }
 
 void Team::setPlayerCount(int playerCount) {

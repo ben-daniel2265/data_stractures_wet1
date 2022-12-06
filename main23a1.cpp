@@ -15,7 +15,7 @@
 #include <iostream>
 
 using namespace std;
-
+/*
 void print(string cmd, StatusType res);
 void print(string cmd, output_t<int> res);
 void query_get_all_players(string cmd, world_cup_t *obj, int teamID);
@@ -134,4 +134,4 @@ void query_get_all_players(string cmd, world_cup_t *obj, int teamID)
 	    }
     }
     delete[] out_mem;
-}
+}*/

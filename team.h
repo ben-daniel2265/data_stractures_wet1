@@ -44,6 +44,8 @@ class Team {
     void setPlayerTreeByScore(AVLTree<Player> *playerTreeByScore);
     void setTopScorer(Player *topScorer);
 
+    void addStrength(int strength);
+
     void printTeam();
 };
 

@@ -88,8 +88,23 @@ class AVLTree {
         }
     }
 
+    void arrayToAVLTree(T** array, int size){
+        this->root = arrayToAVLTree(array, 0, size - 1);
+    }
 
     private: 
+
+    Node* arrayToAVLTree(T** array, int start, int end){
+        if(start > end) return nullptr;
+
+        int mid = (start + end)/2;
+        Node* root = new Node(array[mid]);
+
+        root->left = arrayToAVLTree(array, start, mid - 1);
+        root->right = arrayToAVLTree(array, mid + 1, end);
+
+        return root;
+    }
 
     int countInRange(Node* head, T* minValue, T* maxValue, int(*cmp_func)(T* t1, T* t2)){
         if(head == nullptr) return 0;
@@ -116,13 +131,14 @@ class AVLTree {
 
         if(minComare > 0) rangedIntoArray(head->left, array, index, minValue, maxValue, cmp_func);
 
-        array[*index] = head->value;
-        (*index)++;
+        if(minComare >= 0 && maxCompare <= 0)
+        {
+            array[*index] = head->value;
+            (*index)++;
+        }
 
         if(maxCompare < 0) rangedIntoArray(head->right, array, index, minValue, maxValue, cmp_func);
     }
-
-
 
     int height(Node* head){
         if(head == nullptr) return 0;

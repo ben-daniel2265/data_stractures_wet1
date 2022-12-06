@@ -191,7 +191,7 @@ StatusType world_cup_t::add_player(int playerId, int teamId, int gamesPlayed,
 	teamNode->value->setPlayerCount(teamNode->value->getPlayerCount() + 1);
 	this->player_count++;
 
-	teamNode->value->setTeamStrength(teamNode->value->getTeamStrength() + goals - cards);
+	teamNode->value->addStrength(goals - cards);
 
 	if(goalKeeper){
 		teamNode->value->setGoalieCount(teamNode->value->getGoalieCount() + 1);
@@ -269,7 +269,7 @@ StatusType world_cup_t::remove_player(int playerId)
 		this->active_teams->removeValue(playerTeam, compare_team_by_id);
 	}
 
-	playerTeam->setTeamStrength(playerTeam->getTeamStrength() - p->getGoals() + p->getCardsRecived());
+	playerTeam->addStrength(p->getCardsRecived() - p->getGoals());
 
 	Player* pAbove = p->getAbovePlayer();
 	Player* pBelow = p->getBelowPlayer();
@@ -373,7 +373,7 @@ StatusType world_cup_t::update_player_stats(int playerId, int gamesPlayed,
 	updatedPlayer->getTeam()->setPlayerCount(updatedPlayer->getTeam()->getPlayerCount() + 1);
 	this->player_count++;
 
-	updatedPlayer->getTeam()->setTeamStrength(updatedPlayer->getTeam()->getTeamStrength() + sumGoals - sumCards);
+	updatedPlayer->getTeam()->addStrength(sumGoals - sumCards);
 
 	if(isGoalie){
 		updatedPlayer->getTeam()->setGoalieCount(updatedPlayer->getTeam()->getGoalieCount() + 1);
@@ -487,7 +487,182 @@ output_t<int> world_cup_t::get_team_points(int teamId)
 
 StatusType world_cup_t::unite_teams(int teamId1, int teamId2, int newTeamId)
 {
-	// TODO: Your code goes here
+	if(teamId1 <= 0 || teamId2 <= 0 || teamId1 == teamId2 || newTeamId <= 0){
+		return StatusType::INVALID_INPUT;
+	}
+
+	Team* temp1 = new Team(teamId1, 0);
+	Team* temp2 = new Team(teamId2, 0);
+
+	AVLTree<Team>::Node* teamNode1 = this->team_tree->findValue(temp1, compare_team_by_id);
+	AVLTree<Team>::Node* teamNode2 = this->team_tree->findValue(temp2, compare_team_by_id);
+
+	delete temp1;
+	delete temp2;
+
+	if(teamNode1 == nullptr || teamNode2 == nullptr){
+		return StatusType::FAILURE;
+	}
+
+	Team* tempTeam = new Team(newTeamId, 0);
+	AVLTree<Team>::Node* tempNode = this->team_tree->findValue(tempTeam, compare_team_by_id);
+	delete tempTeam;
+
+	if(tempNode != nullptr && !((teamId1 == newTeamId) || (teamId2 == newTeamId))){
+		return StatusType::FAILURE;
+	}
+
+	bool teamActive1 = teamNode1->value->getGoalieCount() > 0 && teamNode1->value->getPlayerCount() >= 11;
+	bool teamActive2 = teamNode2->value->getGoalieCount() > 0 && teamNode2->value->getPlayerCount() >= 11;
+
+	if(teamActive1){
+		this->active_teams->removeValue(teamNode1->value, compare_team_by_id);
+	}
+	if(teamActive2){
+		this->active_teams->removeValue(teamNode2->value, compare_team_by_id);
+	}
+
+	int countPlayers1 = teamNode1->value->getPlayerCount();
+	int countPlayers2 = teamNode2->value->getPlayerCount();
+	int sumStrength = teamNode1->value->getTeamStrength() + teamNode2->value->getTeamStrength();
+	int sumPoints = teamNode1->value->getPoints() + teamNode2->value->getPoints();
+	int sumPlayers = countPlayers1 + countPlayers2;
+	int sumGoalies = teamNode1->value->getGoalieCount() + teamNode2->value->getGoalieCount();
+
+	int gamesPlayed1 = teamNode1->value->getGamesPlayed();
+	int gamesPlayed2 = teamNode2->value->getGamesPlayed();
+
+	Team* newTeam = new Team(newTeamId, sumPoints);
+	newTeam->setTeamStrength(sumStrength);
+	newTeam->setPlayerCount(sumPlayers);
+	newTeam->setGoalieCount(sumGoalies);
+
+	if(sumPlayers == 0){
+		this->remove_team(teamId1);
+		this->remove_team(teamId2);
+		this->team_tree->insertValue(newTeam, compare_team_by_id);
+
+		return StatusType::SUCCESS;
+	}
+
+	Player** playersArrayById1 = new Player*[countPlayers1];
+	Player** playersArrayByScore1 = new Player*[countPlayers1];
+	Player** playersArrayById2 = new Player*[countPlayers2];
+	Player** playersArrayByScore2 = new Player*[countPlayers2];
+	Player** newPlayersArrayById = new Player*[sumPlayers];
+	Player** newPlayersArrayByScore = new Player*[sumPlayers];
+
+	teamNode1->value->getPlayerTreeById()->intoArray(playersArrayById1);
+	teamNode1->value->getPlayerTreeByScore()->intoArray(playersArrayByScore1);
+	teamNode2->value->getPlayerTreeById()->intoArray(playersArrayById2);
+	teamNode2->value->getPlayerTreeByScore()->intoArray(playersArrayByScore2);
+
+	teamNode1->value->setPlayerCount(0);
+	teamNode2->value->setPlayerCount(0);
+
+	teamNode1 = nullptr;
+	teamNode2 = nullptr;
+
+	this->remove_team(teamId1);
+	this->remove_team(teamId2);
+
+	for(int i = 0; i < countPlayers1; i++){
+		playersArrayById1[i]->add_games_played(gamesPlayed1);
+	}
+
+	for(int i = 0; i < countPlayers2; i++){
+		playersArrayById2[i]->add_games_played(gamesPlayed2);
+	}
+
+	int index1 = 0;
+	int index2 = 0;
+	int compareResult;
+
+	while(index1 < countPlayers1 && index2 < countPlayers2){
+		compareResult = compare_player_by_id(playersArrayById1[index1], playersArrayById2[index2]);
+
+		if(compareResult > 0){
+			newPlayersArrayById[index1 + index2] = playersArrayById2[index2];
+			index2++;
+		}
+		else{
+			newPlayersArrayById[index1 + index2] = playersArrayById1[index1];
+			index1++;
+		}
+	}
+
+	if(index1 == countPlayers1){
+		while(index2 < countPlayers2){
+			newPlayersArrayById[index1 + index2] = playersArrayById2[index2];
+			index2++;
+		}
+	}
+	else{
+		while(index1 < countPlayers1){
+			newPlayersArrayById[index1 + index2] = playersArrayById1[index1];
+			index1++;
+		}
+	}
+
+	index1 = 0;
+	index2 = 0;
+
+	while(index1 < countPlayers1 && index2 < countPlayers2){
+		compareResult = compare_player_by_score(playersArrayByScore1[index1], playersArrayByScore2[index2]);
+
+		if(compareResult > 0){
+			newPlayersArrayByScore[index1 + index2] = playersArrayByScore2[index2];
+			index2++;
+		}
+		else{
+			newPlayersArrayByScore[index1 + index2] = playersArrayByScore1[index1];
+			index1++;
+		}
+	}
+
+	if(index1 == countPlayers1){
+		while(index2 < countPlayers2){
+			newPlayersArrayByScore[index1 + index2] = playersArrayByScore2[index2];
+			index2++;
+		}
+	}
+	else{
+		while(index1 < countPlayers1){
+			newPlayersArrayByScore[index1 + index2] = playersArrayByScore1[index1];
+			index1++;
+		}
+	}
+
+	delete[] playersArrayById1;
+	delete[] playersArrayByScore1;
+	delete[] playersArrayById2;
+	delete[] playersArrayByScore2;
+
+	newPlayersArrayByScore[0]->setBelowPlayerInTeam(nullptr);
+	newPlayersArrayByScore[0]->setAbovePlayerInTeam(newPlayersArrayByScore[1]);
+	newPlayersArrayByScore[0]->setTeam(newTeam);
+	newPlayersArrayByScore[sumPlayers-1]->setBelowPlayerInTeam(newPlayersArrayByScore[sumPlayers-2]);
+	newPlayersArrayByScore[sumPlayers-1]->setAbovePlayerInTeam(nullptr);
+	newPlayersArrayByScore[sumPlayers-1]->setTeam(newTeam);
+
+	for(int i = 1; i < sumPlayers - 1; i++){
+		newPlayersArrayByScore[i]->setBelowPlayerInTeam(newPlayersArrayByScore[i-1]);
+		newPlayersArrayByScore[i]->setAbovePlayerInTeam(newPlayersArrayByScore[i+1]);
+		newPlayersArrayByScore[i]->setTeam(newTeam);
+	}
+
+	newTeam->getPlayerTreeById()->arrayToAVLTree(newPlayersArrayById, sumPlayers);
+	newTeam->getPlayerTreeByScore()->arrayToAVLTree(newPlayersArrayByScore, sumPlayers);
+
+	this->team_tree->insertValue(newTeam, compare_team_by_id);
+
+	if(newTeam->getGoalieCount() > 0 && newTeam->getPlayerCount() >= 11){
+		this->active_teams->insertValue(newTeam, compare_team_by_id);
+	}
+
+	delete[] newPlayersArrayById;
+	delete[] newPlayersArrayByScore;
+
 	return StatusType::SUCCESS;
 }
 
@@ -608,13 +783,18 @@ output_t<int> world_cup_t::get_closest_player(int playerId, int teamId)
 			distBelow = abs(playerNode->value->getCardsRecived() - playerNode->value->getBelowPlayer()->getCardsRecived());
 
 			if(distAbove == distBelow){
-				return idAbove > idBelow ? idAbove : idBelow;
+				distAbove = abs(playerNode->value->getId() - playerNode->value->getAbovePlayer()->getId());
+				distBelow = abs(playerNode->value->getId() - playerNode->value->getBelowPlayer()->getId());
+
+				if(distAbove == distBelow) return idAbove > idBelow ? idAbove : idBelow;
+
+				return distAbove > distBelow ? idBelow : idAbove;
 			}
 
-			return distAbove > distBelow ? idAbove : idBelow;
+			return distAbove > distBelow ? idBelow : idAbove;
 		}
 
-		return distAbove > distBelow ? idAbove : idBelow;
+		return distAbove > distBelow ? idBelow : idAbove;
 	}
 
 	return StatusType::SUCCESS;
@@ -622,6 +802,8 @@ output_t<int> world_cup_t::get_closest_player(int playerId, int teamId)
 
 output_t<int> world_cup_t::knockout_winner(int minTeamId, int maxTeamId)
 {
+
+	//cout << "knockout: " << minTeamId << "-" << maxTeamId << endl;
 	if(minTeamId < 0 || maxTeamId < 0 || maxTeamId < minTeamId){
 		return StatusType::INVALID_INPUT;
 	}
@@ -643,11 +825,13 @@ output_t<int> world_cup_t::knockout_winner(int minTeamId, int maxTeamId)
 	delete temp1;
 	delete temp2;
 
-	int teamStats[numTeams][2];
+	int* teamsId = new int[numTeams];
+	int* teamsStrength = new int [numTeams];
 
 	for(int i = 0; i < numTeams; i++){
-		teamStats[i][0] = teams[i]->getId();
-		teamStats[i][1] = teams[i]->getTeamStrength();
+		teamsId[i] = teams[i]->getId();
+		teamsStrength[i] = teams[i]->getTeamStrength();
+	//	cout << "team: " << teamsId[i] << " strength: " << teamsStrength[i] << endl;
 	}
 
 	delete[] teams;
@@ -658,20 +842,22 @@ output_t<int> world_cup_t::knockout_winner(int minTeamId, int maxTeamId)
 
 	while(jumpSize / 2 < numTeams){
 		while(jumpSize*index + jumpSize / 2 < numTeams){
-			matchResult = teamStats[index*jumpSize][1] - teamStats[index*jumpSize + jumpSize / 2][1];
-			teamStats[index*jumpSize][1] += teamStats[index*jumpSize + jumpSize / 2][1] + 3;
+			matchResult = teamsStrength[index*jumpSize] - teamsStrength[index*jumpSize + jumpSize / 2];
+			teamsStrength[index*jumpSize] += teamsStrength[index*jumpSize + jumpSize / 2] + 3;
 
 			if(matchResult <= 0){
-				teamStats[index*jumpSize][0] = teamStats[index*jumpSize + jumpSize / 2][0];
+				teamsId[index*jumpSize] = teamsId[index*jumpSize + jumpSize / 2];
 			}
-
 			index++;
 		}
+		index = 0;
 		jumpSize *= 2;
 	}
 
-	int finalId = teamStats[0][0];
-	delete[] teamStats;
+	int finalId = teamsId[0];
+
+	delete[] teamsId;
+	delete[] teamsStrength;
 
 	return finalId;
 }
