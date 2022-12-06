@@ -78,7 +78,17 @@ StatusType world_cup_t::remove_team(int teamId)
 		return StatusType::INVALID_INPUT;
 	}
 
-	Team* tempTeam = new Team(teamId, 0);
+
+	Team* tempTeam;
+
+	try{
+		tempTeam = new Team(teamId, 0);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
+
+
 	AVLTree<Team>::Node* teamNode = this->team_tree->findValue(tempTeam, compare_team_by_id);
 	delete tempTeam;
 
@@ -108,7 +118,14 @@ StatusType world_cup_t::add_player(int playerId, int teamId, int gamesPlayed,
 		return StatusType::INVALID_INPUT;
 	}
 
-	Team* tempTeam = new Team(teamId, 0);
+	Team* tempTeam;
+	try{
+		tempTeam = new Team(teamId, 0);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
+
 	AVLTree<Team>::Node* teamNode = this->team_tree->findValue(tempTeam, compare_team_by_id);
 	delete tempTeam;
 
@@ -116,17 +133,29 @@ StatusType world_cup_t::add_player(int playerId, int teamId, int gamesPlayed,
 
 	bool activeBefore = teamNode->value->getGoalieCount() > 0 && teamNode->value->getPlayerCount() >= 11;
 
-	Player* tempPlayer = new Player(playerId, 0,0,0,false);
+	Player* tempPlayer;
+	try{
+		tempPlayer = new Player(playerId, 0,0,0,false);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
+
 	if(this->players_by_id_tree->findValue(tempPlayer, compare_player_by_id) != nullptr){
 		delete tempPlayer;
 		return StatusType::FAILURE;
 	}
 	delete tempPlayer;
 
+	Player* p;
+	try{
+		p = new Player(playerId, goals, gamesPlayed - teamNode->value->getGamesPlayed(), cards, goalKeeper);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
 
-	Player* p = new Player(playerId, goals, gamesPlayed - teamNode->value->getGamesPlayed(), cards, goalKeeper);
 	p->setTeam(teamNode->value);
-
 
 	if(teamNode->value->getPlayerTreeById()->root != nullptr){
 
@@ -229,8 +258,13 @@ StatusType world_cup_t::remove_player(int playerId)
 {
 	if(playerId <= 0) return StatusType::INVALID_INPUT;
 
-
-	Player* tempP = new Player(playerId, 0,0,0,0);
+	Player* tempP;
+	try{
+		tempP = new Player(playerId, 0,0,0,false);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
 	AVLTree<Player>::Node* playerNode = this->players_by_id_tree->findValue(tempP, compare_player_by_id);
 	delete tempP;
 
@@ -293,7 +327,13 @@ StatusType world_cup_t::update_player_stats(int playerId, int gamesPlayed,
 		return StatusType::INVALID_INPUT;
 	}
 
-	Player* tempP = new Player(playerId, 0,0,0,0);
+	Player* tempP;
+	try{
+		tempP = new Player(playerId, 0,0,0,false);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
 	AVLTree<Player>::Node* playerNode = this->players_by_id_tree->findValue(tempP, compare_player_by_id);
 	delete tempP;
 
@@ -304,7 +344,15 @@ StatusType world_cup_t::update_player_stats(int playerId, int gamesPlayed,
 	int sumCards = cardsReceived + playerNode->value->getCardsRecived();
 	bool isGoalie = playerNode->value->isGoalie();
 
-	Player* updatedPlayer = new Player(playerId, sumGoals, sumGames, sumCards, isGoalie);
+
+	Player* updatedPlayer;
+	try{
+		updatedPlayer = new Player(playerId, sumGoals, sumGames, sumCards, isGoalie);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
+
 	updatedPlayer->setTeam(playerNode->value->getTeam());
 
 	this->remove_player(playerId);
@@ -412,8 +460,15 @@ StatusType world_cup_t::play_match(int teamId1, int teamId2)
 		return StatusType::INVALID_INPUT;
 	}
 
-	Team* temp1 = new Team(teamId1, 0);
-	Team* temp2 = new Team(teamId2, 0);
+	Team* temp1;
+	Team* temp2;
+	try{
+		temp1 = new Team(teamId1, 0);
+		temp2 = new Team(teamId2, 0);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
 
 	AVLTree<Team>::Node* teamNode1 = this->team_tree->findValue(temp1, compare_team_by_id);
 	AVLTree<Team>::Node* teamNode2 = this->team_tree->findValue(temp2, compare_team_by_id);
@@ -457,7 +512,13 @@ output_t<int> world_cup_t::get_num_played_games(int playerId)
 		return StatusType::INVALID_INPUT;
 	}
 
-	Player* temp = new Player(playerId, 0, 0, 0, 0);
+	Player* temp;
+	try{
+		temp = new Player(playerId, 0, 0, 0, 0);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
 	AVLTree<Player>::Node* playerNode = this->players_by_id_tree->findValue(temp, compare_player_by_id); 
 	delete temp;
 
@@ -474,7 +535,13 @@ output_t<int> world_cup_t::get_team_points(int teamId)
 		return StatusType::INVALID_INPUT;
 	}
 
-	Team* temp = new Team(teamId, 0);
+	Team* temp;
+	try{
+		temp = new Team(teamId, 0);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
 	AVLTree<Team>::Node* teamNode = this->team_tree->findValue(temp, compare_team_by_id); 
 	delete temp;
 
@@ -491,8 +558,15 @@ StatusType world_cup_t::unite_teams(int teamId1, int teamId2, int newTeamId)
 		return StatusType::INVALID_INPUT;
 	}
 
-	Team* temp1 = new Team(teamId1, 0);
-	Team* temp2 = new Team(teamId2, 0);
+	Team* temp1;
+	Team* temp2;
+	try{
+		temp1 = new Team(teamId1, 0);
+		temp2 = new Team(teamId2, 0);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
 
 	AVLTree<Team>::Node* teamNode1 = this->team_tree->findValue(temp1, compare_team_by_id);
 	AVLTree<Team>::Node* teamNode2 = this->team_tree->findValue(temp2, compare_team_by_id);
@@ -504,7 +578,13 @@ StatusType world_cup_t::unite_teams(int teamId1, int teamId2, int newTeamId)
 		return StatusType::FAILURE;
 	}
 
-	Team* tempTeam = new Team(newTeamId, 0);
+	Team* tempTeam;
+	try{
+		tempTeam = new Team(newTeamId, 0);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
 	AVLTree<Team>::Node* tempNode = this->team_tree->findValue(tempTeam, compare_team_by_id);
 	delete tempTeam;
 
@@ -532,7 +612,13 @@ StatusType world_cup_t::unite_teams(int teamId1, int teamId2, int newTeamId)
 	int gamesPlayed1 = teamNode1->value->getGamesPlayed();
 	int gamesPlayed2 = teamNode2->value->getGamesPlayed();
 
-	Team* newTeam = new Team(newTeamId, sumPoints);
+	Team* newTeam;
+	try{
+		newTeam = new Team(newTeamId, sumPoints);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
 	newTeam->setTeamStrength(sumStrength);
 	newTeam->setPlayerCount(sumPlayers);
 	newTeam->setGoalieCount(sumGoalies);
@@ -545,12 +631,25 @@ StatusType world_cup_t::unite_teams(int teamId1, int teamId2, int newTeamId)
 		return StatusType::SUCCESS;
 	}
 
-	Player** playersArrayById1 = new Player*[countPlayers1];
-	Player** playersArrayByScore1 = new Player*[countPlayers1];
-	Player** playersArrayById2 = new Player*[countPlayers2];
-	Player** playersArrayByScore2 = new Player*[countPlayers2];
-	Player** newPlayersArrayById = new Player*[sumPlayers];
-	Player** newPlayersArrayByScore = new Player*[sumPlayers];
+
+	Player** playersArrayById1;
+	Player** playersArrayByScore1;
+	Player** playersArrayById2;
+	Player** playersArrayByScore2;
+	Player** newPlayersArrayById;
+	Player** newPlayersArrayByScore;
+	
+	try{
+		playersArrayById1 = new Player*[countPlayers1];
+		playersArrayByScore1 = new Player*[countPlayers1];
+		playersArrayById2 = new Player*[countPlayers2];
+		playersArrayByScore2 = new Player*[countPlayers2];
+		newPlayersArrayById = new Player*[sumPlayers];
+		newPlayersArrayByScore = new Player*[sumPlayers];
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
 
 	teamNode1->value->getPlayerTreeById()->intoArray(playersArrayById1);
 	teamNode1->value->getPlayerTreeByScore()->intoArray(playersArrayByScore1);
@@ -678,7 +777,13 @@ output_t<int> world_cup_t::get_top_scorer(int teamId)
 		return this->top_scorer->getId();
 	}
 
-	Team* temp = new Team(teamId, 0);
+	Team* temp;
+	try{
+		temp = new Team(teamId, 0);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
 	AVLTree<Team>::Node* teamNode = this->team_tree->findValue(temp, compare_team_by_id);
 	delete temp;
 
@@ -698,7 +803,13 @@ output_t<int> world_cup_t::get_all_players_count(int teamId)
 		return this->player_count;
 	}
 
-	Team* temp = new Team(teamId, 0);
+	Team* temp;
+	try{
+		temp = new Team(teamId, 0);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
 	AVLTree<Team>::Node* teamNode = this->team_tree->findValue(temp, compare_team_by_id);
 	delete temp;
 
@@ -714,7 +825,13 @@ StatusType world_cup_t::get_all_players(int teamId, int *const output)
 	if(teamId < 0){
 		if(this->get_all_players_count(-1).ans() == 0) return StatusType::FAILURE;
 
-		Player** tempArray = new Player*[this->get_all_players_count(-1).ans()];
+		Player** tempArray;
+		try{
+			tempArray = new Player*[this->get_all_players_count(-1).ans()];
+		}
+		catch(std::exception e){
+			return StatusType::ALLOCATION_ERROR;
+		}
 		this->players_by_score_tree->intoArray(tempArray);
 
 		for(int i = 0; i < this->get_all_players_count(-1).ans(); i++){
@@ -725,7 +842,13 @@ StatusType world_cup_t::get_all_players(int teamId, int *const output)
 		return StatusType::SUCCESS;
 	}
 
-	Team* temp = new Team(teamId, 0);
+	Team* temp;
+	try{
+		temp = new Team(teamId, 0);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
 	AVLTree<Team>::Node* teamNode = this->team_tree->findValue(temp, compare_team_by_id);
 	delete temp;
 
@@ -733,7 +856,13 @@ StatusType world_cup_t::get_all_players(int teamId, int *const output)
 
 	if(teamNode->value->getPlayerCount() == 0) return StatusType::FAILURE;
 
-	Player** tempArray = new Player*[teamNode->value->getPlayerCount()];
+	Player** tempArray;
+		try{
+			tempArray = new Player*[teamNode->value->getPlayerCount()];
+		}
+		catch(std::exception e){
+			return StatusType::ALLOCATION_ERROR;
+		}
 	teamNode->value->getPlayerTreeByScore()->intoArray(tempArray);
 
 	for(int i = 0; i < teamNode->value->getPlayerCount(); i++){
@@ -750,13 +879,27 @@ output_t<int> world_cup_t::get_closest_player(int playerId, int teamId)
 		return StatusType::INVALID_INPUT;
 	}
 
-	Team* tempTeam = new Team(teamId, 0);
+
+	Team* tempTeam;
+	try{
+		tempTeam = new Team(teamId, 0);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
+	
 	AVLTree<Team>::Node* teamNode = this->team_tree->findValue(tempTeam, compare_team_by_id);
 	delete tempTeam;
 
 	if(teamNode == nullptr) return StatusType::FAILURE;
 
-	Player* tempP = new Player(playerId, 0,0,0,0);
+	Player* tempP;
+	try{
+		tempP = new Player(playerId, 0,0,0,0);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
 	AVLTree<Player>::Node* playerNode = teamNode->value->getPlayerTreeById()->findValue(tempP, compare_player_by_id);
 	delete tempP;
 
@@ -808,8 +951,15 @@ output_t<int> world_cup_t::knockout_winner(int minTeamId, int maxTeamId)
 		return StatusType::INVALID_INPUT;
 	}
 
-	Team* temp1 = new Team(minTeamId, 0);
-	Team* temp2 = new Team(maxTeamId, 0);
+	Team* temp1;
+	Team* temp2;
+	try{
+		temp1  = new Team(minTeamId, 0);
+		temp2 = new Team(maxTeamId, 0);
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
 	int numTeams = this->active_teams->countInRange(temp1, temp2, compare_team_by_id);
 
 	if(numTeams == 0){
@@ -818,15 +968,28 @@ output_t<int> world_cup_t::knockout_winner(int minTeamId, int maxTeamId)
 		return StatusType::FAILURE;
 	}
 
-	Team** teams = new Team*[numTeams];
+	Team** teams;
+	try{
+		teams = new Team*[numTeams];
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
 
 	this->active_teams->rangedIntoArray(teams, temp1, temp2, compare_team_by_id);
 
 	delete temp1;
 	delete temp2;
 
-	int* teamsId = new int[numTeams];
-	int* teamsStrength = new int [numTeams];
+	int* teamsId;
+	int* teamsStrength;
+	try{
+		teamsId = new int[numTeams];
+		teamsStrength = new int [numTeams];
+	}
+	catch(std::exception e){
+		return StatusType::ALLOCATION_ERROR;
+	}
 
 	for(int i = 0; i < numTeams; i++){
 		teamsId[i] = teams[i]->getId();
@@ -861,22 +1024,3 @@ output_t<int> world_cup_t::knockout_winner(int minTeamId, int maxTeamId)
 
 	return finalId;
 }
-
-
-/*int main(){
-    world_cup_t *t = new world_cup_t();
-	t->add_team(1, 2);
-	t->add_player(1, 1, 1,2,1,0);
-	t->add_player(2, 1, 5,7,3,0);
-	t->add_player(3, 1, 5,1,0,0);
-	t->add_player(4, 1, 2,2,0,0);
-	t->add_player(5, 1, 6,1,1,0);
-	t->add_player(6, 1, 1,0,0,0);
-
-	t->remove_player(2);
-	t->remove_player(4);
-
-	delete t;
-
-    return 0;
-}*/
