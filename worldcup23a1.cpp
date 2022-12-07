@@ -750,6 +750,7 @@ StatusType world_cup_t::unite_teams(int teamId1, int teamId2, int newTeamId)
 		newPlayersArrayByScore[i]->setTeam(newTeam);
 	}
 
+	newTeam->setTopScorer(newPlayersArrayByScore[sumPlayers - 1]);
 	newTeam->getPlayerTreeById()->arrayToAVLTree(newPlayersArrayById, sumPlayers);
 	newTeam->getPlayerTreeByScore()->arrayToAVLTree(newPlayersArrayByScore, sumPlayers);
 
